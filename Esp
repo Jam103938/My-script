@@ -1,0 +1,182 @@
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+local Window = OrionLib:MakeWindow({Name = "ESP", HidePremium = true, SaveConfig = true, ConfigFolder = "OrionESP"})
+
+local lplr = game.Players.LocalPlayer
+local camera = game:GetService("Workspace").CurrentCamera
+local CurrentCamera = workspace.CurrentCamera
+local worldToViewportPoint = CurrentCamera.worldToViewportPoint
+
+local HeadOff = Vector3.new(0, 0.5, 0)
+local LegOff = Vector3.new(0, 3, 0)
+
+local teamColor = Color3.new(0, 0, 1)  -- Blue for team
+local enemyColor = Color3.new(1, 0, 0)  -- Red for enemies
+
+local ESP = {}
+local Settings = {
+    ESPEnabled = true,
+    TracersEnabled = true,
+    BoxThickness = 3,
+    TextSize = 9,
+    TracerThickness = 2,
+    TeamColor = Color3.new(0, 0, 1),
+    EnemyColor = Color3.new(1, 0, 0)
+}
+
+local function createBoxEsp(v)
+    local Box = Drawing.new("Square")
+    Box.Visible = false
+    Box.Color = v.TeamColor == lplr.TeamColor and Settings.TeamColor or Settings.EnemyColor
+    Box.Thickness = Settings.BoxThickness
+    Box.Transparency = 1
+    Box.Filled = false
+
+    local HealthBar = Drawing.new("Line")
+    HealthBar.Visible = false
+    HealthBar.Color = Color3.new(0, 1, 0)
+    HealthBar.Thickness = 2
+
+    local NameTag = Drawing.new("Text")
+    NameTag.Visible = false
+    NameTag.Color = Color3.new(1, 1, 1)
+    NameTag.Size = Settings.TextSize
+    NameTag.Center = true
+    NameTag.Outline = true
+    NameTag.OutlineColor = Color3.new(0, 0, 0)
+
+    local DistanceTag = Drawing.new("Text")
+    DistanceTag.Visible = false
+    DistanceTag.Color = Color3.new(1, 1, 1)
+    DistanceTag.Size = Settings.TextSize
+    DistanceTag.Center = true
+    DistanceTag.Outline = true
+    DistanceTag.OutlineColor = Color3.new(0, 0, 0)
+
+    local Tracer = Drawing.new("Line")
+    Tracer.Visible = false
+    Tracer.Color = v.TeamColor == lplr.TeamColor and Settings.TeamColor or Settings.EnemyColor
+    Tracer.Thickness = Settings.TracerThickness
+
+    game:GetService("RunService").RenderStepped:Connect(function()
+        if v.Character and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("HumanoidRootPart") and v ~= lplr and v.Character.Humanoid.Health > 0 then
+            local Vector, onScreen = camera:worldToViewportPoint(v.Character.HumanoidRootPart.Position)
+
+            local RootPart = v.Character.HumanoidRootPart
+            local Head = v.Character.Head
+            local RootPosition, RootVisibility = worldToViewportPoint(CurrentCamera, RootPart.Position)
+            local HeadPosition = worldToViewportPoint(CurrentCamera, Head.Position + HeadOff)
+            local LegPosition = worldToViewportPoint(CurrentCamera, RootPart.Position - LegOff)
+
+            Box.Size = Vector2.new(1000 / RootPosition.Z, HeadPosition.Y - LegPosition.Y)
+            Box.Position = Vector2.new(RootPosition.X - Box.Size.X / 2, RootPosition.Y - Box.Size.Y / 2)
+
+            local health = v.Character.Humanoid.Health / v.Character.Humanoid.MaxHealth
+            HealthBar.From = Vector2.new(Box.Position.X + Box.Size.X + 5, Box.Position.Y + Box.Size.Y * (1 - health))
+            HealthBar.To = Vector2.new(Box.Position.X + Box.Size.X + 5, Box.Position.Y + Box.Size.Y)
+            HealthBar.Color = Color3.new(1 - health, health, 0)
+
+            NameTag.Position = Vector2.new(Box.Position.X + Box.Size.X / 2, Box.Position.Y - 20)
+            NameTag.Text = v.Name
+            NameTag.Visible = true
+
+            DistanceTag.Position = Vector2.new(Box.Position.X + Box.Size.X / 2, Box.Position.Y + Box.Size.Y)
+            DistanceTag.Text = tostring(math.floor((lplr.Character.HumanoidRootPart.Position - RootPart.Position).Magnitude)) .. "m"
+            DistanceTag.Visible = true
+
+            local lplrWaist = lplr.Character:FindFirstChild("HumanoidRootPart")
+            if lplrWaist then
+                local lplrWaistViewport = camera:worldToViewportPoint(lplrWaist.Position)
+
+                Tracer.From = Vector2.new(lplrWaistViewport.X, lplrWaistViewport.Y)
+                Tracer.To = Vector2.new(RootPosition.X, RootPosition.Y)
+            end
+
+            Box.Visible = onScreen and Settings.ESPEnabled
+            HealthBar.Visible = onScreen and Settings.ESPEnabled
+            NameTag.Visible = true and Settings.ESPEnabled
+            DistanceTag.Visible = onScreen and Settings.ESPEnabled
+            Tracer.Visible = Settings.TracersEnabled
+        else
+            Box.Visible = false
+            HealthBar.Visible = false
+            NameTag.Visible = false
+            DistanceTag.Visible = false
+            Tracer.Visible = false
+        end
+    end)
+end
+
+for i, v in pairs(game.Players:GetChildren()) do
+    createBoxEsp(v)
+end
+
+game.Players.PlayerAdded:Connect(function(v)
+    createBoxEsp(v)
+end)
+
+-- Orion Library UI
+local Tab = Window:MakeTab({Name = "ESP", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+
+Tab:AddToggle({
+    Name = "ESP Enabled",
+    Default = true,
+    Callback = function(value)
+        Settings.ESPEnabled = value
+    end
+})
+
+Tab:AddToggle({
+    Name = "Tracers Enabled",
+    Default = true,
+    Callback = function(value)
+        Settings.TracersEnabled = value
+    end
+})
+
+Tab:AddSlider({
+    Name = "Box Thickness",
+    Min = 1,
+    Max = 5,
+    Default = 3,
+    Callback = function(value)
+        Settings.BoxThickness = value
+    end
+})
+
+Tab:AddSlider({
+    Name = "Tracer Thickness",
+    Min = 1,
+    Max = 5,
+    Default = 2,
+    Callback = function(value)
+        Settings.TracerThickness = value
+    end
+})
+
+Tab:AddSlider({
+    Name = "Text Size",
+    Min = 8,
+    Max = 15,
+    Default = 9,
+    Callback = function(value)
+        Settings.TextSize = value
+    end
+})
+
+Tab:AddColorpicker({
+    Name = "Team Color",
+    Default = teamColor,
+    Callback = function(value)
+        Settings.TeamColor = value
+    end
+})
+
+Tab:AddColorpicker({
+    Name = "Enemy Color",
+    Default = enemyColor,
+    Callback = function(value)
+        Settings.EnemyColor = value
+    end
+})
+
+OrionLib:Init()

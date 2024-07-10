@@ -1,0 +1,57 @@
+local players = game:GetService("Players")
+local workspace = game:GetService("Workspace")
+local runService = game:GetService("RunService")
+
+-- Create a function to draw a box around an object
+local function drawESP(object)
+    local billboardGui = Instance.new("BillboardGui")
+    local textLabel = Instance.new("TextLabel")
+
+    billboardGui.Name = "ESP"
+    billboardGui.AlwaysOnTop = true
+    billboardGui.Size = UDim2.new(1, 0, 1, 0)
+    billboardGui.StudsOffset = Vector3.new(0, 2, 0)
+    billboardGui.Adornee = object
+
+    textLabel.Parent = billboardGui
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = object.Name
+    textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    textLabel.TextStrokeTransparency = 0.5
+    textLabel.TextScaled = true
+
+    billboardGui.Parent = object
+end
+
+-- Create a function to remove ESP from an object
+local function removeESP(object)
+    if object:FindFirstChild("ESP") then
+        object.ESP:Destroy()
+    end
+end
+
+-- Create a function to add ESP to all objects in the workspace
+local function addESPToAllObjects()
+    for _, object in ipairs(workspace:GetDescendants()) do
+        if object:IsA("Model") and object:FindFirstChild("HumanoidRootPart") then
+            drawESP(object)
+        end
+    end
+end
+
+-- Create a function to update ESP
+local function updateESP()
+    for _, player in ipairs(players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            removeESP(player.Character)
+            drawESP(player.Character)
+        end
+    end
+end
+
+-- Add ESP to all objects initially
+addESPToAllObjects()
+
+-- Update ESP whenever the run service steps
+runService.RenderStepped:Connect(updateESP)

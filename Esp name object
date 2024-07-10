@@ -15,6 +15,56 @@ local function createNameESP(part, text)
     label.Text = text
     label.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Change color as needed
     label.TextScaled = true
+    label.TextSize = 8  -- Set the text size to 8
+
+    billboard.Parent = part
+end
+
+local function isValidObject(object)
+    -- Add conditions to exclude player body parts and include specific objects you want
+    return object:IsA("BasePart") and not object:IsDescendantOf(game.Players)
+end
+
+local function addNameESPToWorkspace()
+    for _, object in pairs(workspace:GetDescendants()) do
+        if isValidObject(object) then
+            createNameESP(object, object.Name)
+        end
+    end
+end
+
+local Window = OrionLib:MakeWindow({Name = "Name ESP Hub", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+
+local Tab = Window:MakeTab({
+    Name = "ESP",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+Tab:AddButton({
+    Name = "Enable Name ESP",
+    Callback = function()
+        addNameESPToWorkspace()
+    end    
+})
+
+OrionLib:Init()-- Ensure you have the Orion library loaded before running this script
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+
+local function createNameESP(part, text)
+    local billboard = Instance.new("BillboardGui")
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+
+    local label = Instance.new("TextLabel")
+    label.Parent = billboard
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(0, 255, 0)  -- Change color as needed
+    label.TextScaled = true
 
     billboard.Parent = part
 end

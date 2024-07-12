@@ -61,3 +61,5 @@ if disastersFolder then
 else
     print("DisastersFolder not found.")
 end
+-- see player names
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()

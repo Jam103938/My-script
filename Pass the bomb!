@@ -64,59 +64,34 @@ end
 -- see player names
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()
 -- esp on players
-local players = game:GetService("Players")
-local tweenService = game:GetService("TweenService")
+local function createRainbowESP(player)
+    if not player.Character then return end
 
-local function createRainbowTween(highlight)
-    local tweenInfo = TweenInfo.new(5, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1, true)
-    local goal = {FillColor = Color3.new(1, 0, 0)}
+    local highlight = Instance.new("Highlight")
+    highlight.Adornee = player.Character
+    highlight.Parent = game.Workspace
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
 
-    local function tweenColors()
-        goal.FillColor = Color3.new(math.random(), math.random(), math.random())
-        local tween = tweenService:Create(highlight, tweenInfo, goal)
-        tween:Play()
+    local function rainbowColor()
+        local hue = tick() % 5 / 5
+        return Color3.fromHSV(hue, 1, 1)
     end
 
-    while highlight.Parent do
-        tweenColors()
-        wait(1)
-    end
-end
-
-local function createESP(player)
-    if player == players.LocalPlayer then return end
-
-    player.CharacterAdded:Connect(function(character)
-        local highlight = Instance.new("Highlight")
-        highlight.Name = "PlayerESP"
-        highlight.Adornee = character
-        highlight.OutlineTransparency = 0.5
-        highlight.FillTransparency = 0.5
-        highlight.Parent = character
-
-        spawn(function()
-            createRainbowTween(highlight)
-        end)
+    game:GetService("RunService").RenderStepped:Connect(function()
+        highlight.FillColor = rainbowColor()
+        highlight.OutlineColor = rainbowColor()
     end)
 
-    if player.Character then
-        local highlight = Instance.new("Highlight")
-        highlight.Name = "PlayerESP"
-        highlight.Adornee = player.Character
-        highlight.OutlineTransparency = 0.5
-        highlight.FillTransparency = 0.5
-        highlight.Parent = player.Character
-
-        spawn(function()
-            createRainbowTween(highlight)
-        end)
-    end
+    player.CharacterAdded:Connect(function(character)
+        highlight.Adornee = character
+    end)
 end
 
-for _, player in ipairs(players:GetPlayers()) do
-    createESP(player)
+for _, player in pairs(game.Players:GetPlayers()) do
+    createRainbowESP(player)
 end
 
-players.PlayerAdded:Connect(function(player)
-    createESP(player)
+game.Players.PlayerAdded:Connect(function(player)
+    createRainbowESP(player)
 end)

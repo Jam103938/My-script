@@ -61,37 +61,6 @@ if disastersFolder then
 else
     print("DisastersFolder not found.")
 end
--- see player names
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()
--- esp on players
-local function createRainbowESP(player)
-    if not player.Character then return end
 
-    local highlight = Instance.new("Highlight")
-    highlight.Adornee = player.Character
-    highlight.Parent = game.Workspace
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-
-    local function rainbowColor()
-        local hue = tick() % 5 / 5
-        return Color3.fromHSV(hue, 1, 1)
-    end
-
-    game:GetService("RunService").RenderStepped:Connect(function()
-        highlight.FillColor = rainbowColor()
-        highlight.OutlineColor = rainbowColor()
-    end)
-
-    player.CharacterAdded:Connect(function(character)
-        highlight.Adornee = character
-    end)
-end
-
-for _, player in pairs(game.Players:GetPlayers()) do
-    createRainbowESP(player)
-end
-
-game.Players.PlayerAdded:Connect(function(player)
-    createRainbowESP(player)
-end)
+-- Remove ESP and see player names
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()

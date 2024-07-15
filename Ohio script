@@ -89,7 +89,7 @@ end
 
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
-local Window = OrionLib:MakeWindow({Name = "Ohio Utilities", HidePremium = false, SaveConfig = true, IntroText = "Made By JamJam Ohio Script", ConfigFolder = "OrionTest"})
+local Window = OrionLib:MakeWindow({Name = "Ohio Utilities", HidePremium = false, IntroText = "Made By JamJam Ohio Script", SaveConfig = true, ConfigFolder = "OrionTest"})
 
 local mainTab = Window:MakeTab({
     Name = "Main",

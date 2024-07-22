@@ -1,3 +1,6 @@
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "My Script", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionConfig"})
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -5,10 +8,14 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 local bombName = "Bomb"
 
+local teleportEnabled = false
+local autoTeleportEnabled = false
+local teleportConnection
+
 local function createBaseplate()
     local baseplate = Instance.new("Part")
     baseplate.Size = Vector3.new(5, 1, 5)
-    baseplate.CFrame = CFrame.new(4.25679731, 22.9, 1.1135321)
+    baseplate.CFrame = CFrame.new(4.25679731, 22, 1.1135321)
     baseplate.Anchored = true
     baseplate.BrickColor = BrickColor.new("Bright blue")
     baseplate.Parent = Workspace
@@ -45,22 +52,80 @@ local function teleportToBaseplate()
     end
 end
 
-RunService.Heartbeat:Connect(function()
-    if isHoldingBomb() then
-        teleportToRandomPlayer()
-    else
-        teleportToBaseplate()
+local function teleportHandler()
+    if teleportConnection then
+        teleportConnection:Disconnect()
     end
-end)
-
--- Remove DisastersFolder if it exists
-local disastersFolder = Workspace:FindFirstChild("DisastersFolder")
-if disastersFolder then
-    disastersFolder:Destroy()
-    print("DisastersFolder deleted successfully.")
-else
-    print("DisastersFolder not found.")
+    
+    teleportConnection = RunService.Heartbeat:Connect(function()
+        if teleportEnabled then
+            if isHoldingBomb() then
+                teleportToRandomPlayer()
+            else
+                teleportToBaseplate()
+            end
+        end
+    end)
 end
 
--- Remove ESP and see player names
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()
+local function teleportTo(position)
+    local character = player.Character or player.CharacterAdded:Wait()
+    character:SetPrimaryPartCFrame(CFrame.new(position))
+end
+
+local function autoTeleport()
+    while autoTeleportEnabled do
+        for i = 0, 10 do
+            local coin = Workspace.DisastersFolder:FindFirstChild("Coin" .. i)
+            if coin then
+                teleportTo(coin.Position)
+                wait(1)
+            end
+        end
+        wait(1)
+    end
+end
+
+local function autoRemoveMeteor()
+    while true do
+        local meteor = Workspace:FindFirstChild("DisastersFolder") and Workspace.DisastersFolder:FindFirstChild("Meteor")
+        if meteor then
+            meteor:Destroy()
+        end
+        wait(1)
+    end
+end
+
+coroutine.wrap(autoRemoveMeteor)()
+
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()
+
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+MainTab:AddToggle({
+    Name = "Enable Bomb Teleport(only open it if you were respawn there would be bunch of error)",
+    Default = false,
+    Callback = function(value)
+        teleportEnabled = value
+        if value then
+            teleportHandler()
+        end
+    end
+})
+
+MainTab:AddToggle({
+    Name = "Enable Auto Teleport to Coins",
+    Default = false,
+    Callback = function(value)
+        autoTeleportEnabled = value
+        if value then
+            coroutine.wrap(autoTeleport)()
+        end
+    end
+})
+
+OrionLib:Init()

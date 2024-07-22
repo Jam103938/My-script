@@ -15,7 +15,7 @@ local teleportConnection
 local function createBaseplate()
     local baseplate = Instance.new("Part")
     baseplate.Size = Vector3.new(5, 1, 5)
-    baseplate.CFrame = CFrame.new(4.25679731, 22.7, 1.1135321)
+    baseplate.CFrame = CFrame.new(7.25679731, 23, 1.1135321)
     baseplate.Anchored = true
     baseplate.BrickColor = BrickColor.new("Bright blue")
     baseplate.Parent = Workspace

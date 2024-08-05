@@ -83,8 +83,6 @@ end
 
 coroutine.wrap(autoRemoveMeteor)()
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Jam103938/See-player-names/main/See%20player%20names"))()
-
 local MainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",

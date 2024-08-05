@@ -1,0 +1,68 @@
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local screenGui = Instance.new("ScreenGui")
+local minimapFrame = Instance.new("Frame")
+local minimapDotTemplate = Instance.new("Frame")
+
+screenGui.Name = "MinimapGui"
+screenGui.Parent = game.CoreGui
+
+minimapFrame.Name = "MinimapFrame"
+minimapFrame.Size = UDim2.new(0, 200, 0, 200) -- Minimap size
+minimapFrame.Position = UDim2.new(0, 10, 0, 10) -- Position in the top left corner with some margin
+minimapFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minimapFrame.BackgroundTransparency = 0.5
+minimapFrame.Parent = screenGui
+
+minimapDotTemplate.Name = "MinimapDot"
+minimapDotTemplate.Size = UDim2.new(0, 5, 0, 5) -- Size of each dot
+minimapDotTemplate.BorderSizePixel = 0
+
+local function createMinimapDot(color)
+    local dot = minimapDotTemplate:Clone()
+    dot.BackgroundColor3 = color
+    dot.Parent = minimapFrame
+    return dot
+end
+
+local playerDots = {}
+
+local function updateMinimap()
+    local localPlayer = Players.LocalPlayer
+    local localChar = localPlayer.Character
+    if not localChar or not localChar.PrimaryPart then return end
+
+    local localPos = localChar.PrimaryPart.Position
+
+    
+    local localDot = playerDots[localPlayer] or createMinimapDot(Color3.fromRGB(0, 0, 255)) -- Blue color for local player
+    playerDots[localPlayer] = localDot
+    localDot.Position = UDim2.new(0.5, 0, 0.5, 0)
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character.PrimaryPart then
+            local dot = playerDots[player] or createMinimapDot(Color3.fromRGB(0, 255, 0)) -- Green color for other players
+            playerDots[player] = dot
+
+            local playerPos = player.Character.PrimaryPart.Position
+            local offset = playerPos - localPos
+
+            -- Minimap scale factor, adjust as needed
+            local scaleFactor = 0.1
+
+            dot.Position = UDim2.new(0.5, offset.X * scaleFactor, 0.5, -offset.Z * scaleFactor)
+        end
+    end
+end
+
+RunService.RenderStepped:Connect(updateMinimap)
+
+Players.PlayerRemoving:Connect(function(player)
+    if playerDots[player] then
+        playerDots[player]:Destroy()
+        playerDots[player] = nil
+    end
+end)

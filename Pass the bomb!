@@ -12,18 +12,6 @@ local teleportEnabled = false
 local autoTeleportEnabled = false
 local teleportConnection
 
-local function createBaseplate()
-    local baseplate = Instance.new("Part")
-    baseplate.Size = Vector3.new(5, 1, 5)
-    baseplate.CFrame = CFrame.new(9.25679731, 22, 1.1135321)
-    baseplate.Anchored = true
-    baseplate.BrickColor = BrickColor.new("Bright blue")
-    baseplate.Parent = Workspace
-    return baseplate
-end
-
-local baseplate = createBaseplate()
-
 local function isHoldingBomb()
     return player.Character and player.Character:FindFirstChild(bombName) ~= nil
 end
@@ -45,13 +33,6 @@ local function teleportToRandomPlayer()
     end
 end
 
-local function teleportToBaseplate()
-    local character = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if baseplate and character then
-        character.CFrame = baseplate.CFrame + Vector3.new(0, 3, 0)
-    end
-end
-
 local function teleportHandler()
     if teleportConnection then
         teleportConnection:Disconnect()
@@ -62,7 +43,11 @@ local function teleportHandler()
             if isHoldingBomb() then
                 teleportToRandomPlayer()
             else
-                teleportToBaseplate()
+                -- Added anti-slip: teleport to a fixed position above the ground
+                local character = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if character then
+                    character.CFrame = CFrame.new(0, 50, 0)
+                end
             end
         end
     end)

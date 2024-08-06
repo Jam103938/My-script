@@ -1,3 +1,49 @@
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local screenGui = Instance.new("ScreenGui")
+local frame = Instance.new("Frame")
+local yesButton = Instance.new("TextButton")
+local noButton = Instance.new("TextButton")
+local titleLabel = Instance.new("TextLabel")
+
+screenGui.Name = "TeleportGui"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+frame.Size = UDim2.new(0.4, 0, 0.3, 0)
+frame.Position = UDim2.new(0.3, 0, 0.35, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 0.5
+frame.Parent = screenGui
+
+titleLabel.Size = UDim2.new(1, 0, 0.4, 0)
+titleLabel.Text = "Do you want to teleport to the Pass the Bomb game?"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextScaled = true
+titleLabel.BackgroundTransparency = 1
+titleLabel.Parent = frame
+
+yesButton.Size = UDim2.new(0.4, 0, 0.3, 0)
+yesButton.Position = UDim2.new(0.1, 0, 0.55, 0)
+yesButton.Text = "Yes"
+yesButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+yesButton.Parent = frame
+
+noButton.Size = UDim2.new(0.4, 0, 0.3, 0)
+noButton.Position = UDim2.new(0.1, 0, 0.85, 0)
+noButton.Text = "No"
+noButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+noButton.Parent = frame
+
+yesButton.MouseButton1Click:Connect(function()
+    TeleportService:Teleport(2961583129, player)
+end)
+
+noButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+if game.PlaceID = 2961583129 then
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local Window = OrionLib:MakeWindow({Name = "Pass the Bomb script Made it Open Source lol", HidePremium = false, SaveConfig = true, IntroText = Created by Jaimz | Pass the bomb, ConfigFolder = "OrionConfig"})
 

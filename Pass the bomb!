@@ -1,5 +1,5 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "My Script", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionConfig"})
+local Window = OrionLib:MakeWindow({Name = "Pass the Bomb script Made it Open Source lol", HidePremium = false, SaveConfig = true, IntroText = Created by Jaimz | Pass the bomb, ConfigFolder = "OrionConfig"})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")

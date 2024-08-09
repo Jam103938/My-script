@@ -73,11 +73,18 @@ local function AutoHatchEggs()
         wait(1)
     end
 end
-
+--// main tab \\--
 local mainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
+})
+
+mainTab:AddButton({
+	Name = "Pressed this to join my discord",
+	Callback = function()
+      		setclipboard("https://discord.com/invite/Yb6JNPAm3u")
+  	end    
 })
 
 mainTab:AddToggle({
@@ -90,7 +97,7 @@ mainTab:AddToggle({
         end
     end
 })
---// main tab \\--
+
 mainTab:AddToggle({
     Name = "Auto Upgrade",
     Default = false,

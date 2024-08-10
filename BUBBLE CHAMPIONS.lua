@@ -34,7 +34,7 @@ end
 
 local function AutoUpgrade()
     if _G.AutoUpgrade then
-        for i = 2, 11 do
+        for i = 2, 100 do
             local args = {[1] = i}
             game:GetService("ReplicatedStorage").Library.Knit.Services.ClicksService.RE.Equip:FireServer(unpack(args))
             wait(0.1)

@@ -1,3 +1,8 @@
+local args = {
+    [1] = workspace.Worlds:FindFirstChild("2"):FindFirstChild("NPC'S"):FindFirstChild("6")
+}
+
+game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Start:FireServer(unpack(args))
 local targetPlaceId = 17645141868
 
 local function teleportToGame()
@@ -17,6 +22,7 @@ end
 
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 local Window = OrionLib:MakeWindow({Name = "Auto Clicker Script", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionConfig"})
+
 --// Enable the checkbox \\--
 _G.AutoClick = false
 _G.AutoUpgrade = false
@@ -73,7 +79,8 @@ local function AutoHatchEggs()
         wait(1)
     end
 end
---// main tab \\--
+
+--// Main Tab \\--
 local mainTab = Window:MakeTab({
     Name = "Main",
     Icon = "rbxassetid://4483345998",
@@ -138,29 +145,47 @@ local FightTab = Window:MakeTab({
     PremiumOnly = false
 })
 
-local selectedNumber = 1
+local selectedNumber1to5 = 1
+local selectedNumber6to10 = 6
 local autoTapEnabled = false
 
 FightTab:AddDropdown({
-    Name = "Select NPC",
+    Name = "World 2",
     Default = "1",
     Options = {"1", "2", "3", "4", "5"},
     Callback = function(value)
-        selectedNumber = tonumber(value)
+        selectedNumber1to5 = tonumber(value)
+    end
+})
+
+FightTab:AddDropdown({
+    Name = "World 2",
+    Default = "6",
+    Options = {"6", "7", "8", "9", "10"},
+    Callback = function(value)
+        selectedNumber6to10 = tonumber(value)
     end
 })
 
 local function startAutomation()
     while autoTapEnabled do
-        local npcPath = workspace.Worlds:FindFirstChild("1"):FindFirstChild("NPC'S"):FindFirstChild(tostring(selectedNumber))
-        if npcPath then
-            local args = {[1] = npcPath}
+        local npcPath1to5 = workspace.Worlds:FindFirstChild("2"):FindFirstChild("NPC'S"):FindFirstChild(tostring(selectedNumber1to5))
+        local npcPath6to10 = workspace.Worlds:FindFirstChild("2"):FindFirstChild("NPC'S"):FindFirstChild(tostring(selectedNumber6to10))
+
+        if npcPath1to5 then
+            local args = {[1] = npcPath1to5}
             game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Start:FireServer(unpack(args))
             game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Ready:FireServer()
             game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Update:FireServer()
-        else
-            print("NPC not found!")
         end
+
+        if npcPath6to10 then
+            local args = {[1] = npcPath6to10}
+            game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Start:FireServer(unpack(args))
+            game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Ready:FireServer()
+            game:GetService("ReplicatedStorage").Library.Knit.Services.FightService.RE.Update:FireServer()
+        end
+
         wait(0.1)
     end
 end

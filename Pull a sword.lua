@@ -1,6 +1,6 @@
-local placeIdToJoin = 13827198708
+local placeIdtojoin = 13827198708
 
-local function sendNotification(title, text, duration, button1, button2, callback)
+local function sendnotification(title, text, duration, button1, button2, callback)
     local bindableFunction = Instance.new("BindableFunction")
     bindableFunction.OnInvoke = callback
 
@@ -14,10 +14,10 @@ local function sendNotification(title, text, duration, button1, button2, callbac
     })
 end
 
-if game.PlaceId == placeIdToJoin then
-    sendNotification("Thank You", "Thank you for using my script! Enjoy!", 5)
+if game.PlaceId == placeIdtojoin then
+    sendnotification("Thank You", "Thank you for using my script! Enjoy!", 5)
 else
-    sendNotification("Join Game", "Would you like to join the game with PlaceId: " .. placeIdToJoin .. "?", 10, "Yes", "No", function(buttonClicked)
+    sendnotification("Join Game", "Would you like to join the game with PlaceId: " .. placeIdToJoin .. "?", 10, "Yes", "No", function(buttonClicked)
         if buttonClicked == "Yes" then
             game:GetService("TeleportService"):Teleport(placeIdToJoin, game.Players.LocalPlayer)
         else
@@ -26,7 +26,7 @@ else
     end)
 end
 
-if game.PlaceId == placeIdToJoin then
+if game.PlaceId == placeIdtojoin then
     local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
 
     local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
@@ -162,6 +162,7 @@ if game.PlaceId == placeIdToJoin then
             setclipboard("https://discord.com/invite/Yb6JNPAm3u")
             OrionLib:MakeNotification({
                 Name = "Thanks for joining lol",
+                Title = "Join my Discord",
                 Content = "Thank you for joining my discord :)",
                 Image = "rbxassetid://4483345998",
                 Time = 5

@@ -1,10 +1,37 @@
- local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local placeIdToJoin = 13827198708
+
+local function sendNotification(title, text, duration, button1, button2, callback)
+    local bindableFunction = Instance.new("BindableFunction")
+    bindableFunction.OnInvoke = callback
+
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration,
+        Button1 = button1,
+        Button2 = button2,
+        Callback = bindableFunction
+    })
+end
+
+if game.PlaceId == placeIdToJoin then
+    sendNotification("Thank You", "Thank you for using my script! Enjoy!", 5)
+else
+    sendNotification("Join Game", "Would you like to join the game with PlaceId: " .. placeIdToJoin .. "?", 10, "Yes", "No", function(buttonClicked)
+        if buttonClicked == "Yes" then
+            game:GetService("TeleportService"):Teleport(placeIdToJoin, game.Players.LocalPlayer)
+        else
+            print("Cancelled joining the game.")
+        end
+    end)
+end
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
     local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
-    local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
 
     local Window = OrionLib:MakeWindow({
-        Name = executor .. " | " .. gameName .. " | Auto Farm Script",
+        Name = executor .. " | Auto Farm Script",
         HidePremium = false,
         SaveConfig = true,
         ConfigFolder = "Goodguy29_AutoFarm"

@@ -26,9 +26,8 @@ else
     end)
 end
 
-if game.PlaceId == 13827198708 then
-
-    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+if game.PlaceId == placeIdToJoin then
+    local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
 
     local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
 
@@ -42,22 +41,19 @@ if game.PlaceId == 13827198708 then
     local MainTab = Window:MakeTab({
         Name = "Main",
         Icon = "rbxassetid://4483345998",
-        PremiumOnly = false,
-        ShowTab = true
+        PremiumOnly = false
     })
 
     local EggTab = Window:MakeTab({
         Name = "Egg",
         Icon = "rbxassetid://4483345998",
-        PremiumOnly = false,
-        ShowTab = true
+        PremiumOnly = false
     })
 
     local CreditsTab = Window:MakeTab({
         Name = "Credits",
         Icon = "rbxassetid://4483345998",
-        PremiumOnly = false,
-        ShowTab = true
+        PremiumOnly = false
     })
 
     MainTab:AddToggle({
@@ -66,11 +62,7 @@ if game.PlaceId == 13827198708 then
         Callback = function(value)
             _G.AutoClick = value
             while _G.AutoClick do
-                local clickArgs = {
-                    [1] = "Click",
-                    [2] = false
-                }
-                game:GetService("ReplicatedStorage").ClickEvent:FireServer(unpack(clickArgs))
+                game:GetService("ReplicatedStorage").ClickEvent:FireServer("Click", false)
                 wait(0.1)
             end
         end
@@ -83,11 +75,7 @@ if game.PlaceId == 13827198708 then
             _G.AutoUpgrade = value
             while _G.AutoUpgrade do
                 for i = 2, 10000 do
-                    local upgradeArgs = {
-                        [1] = game:GetService("ReplicatedStorage").Items.Pencil:FindFirstChild(tostring(i)),
-                        [2] = false
-                    }
-                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.ClickChangeEvent:FireServer(unpack(upgradeArgs))
+                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.ClickChangeEvent:FireServer(game:GetService("ReplicatedStorage").Items.Pencil:FindFirstChild(tostring(i)), false)
                     wait(0.1)
                 end
             end
@@ -101,10 +89,7 @@ if game.PlaceId == 13827198708 then
             _G.AutoClaimGifts = value
             while _G.AutoClaimGifts do
                 for i = 1, 12 do
-                    local giftArgs = {
-                        [1] = "Reward" .. tostring(i)
-                    }
-                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.ClaimGift:FireServer(unpack(giftArgs))
+                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteEvent.ClaimGift:FireServer("Reward" .. tostring(i))
                     wait(0.5)
                 end
             end
@@ -132,11 +117,7 @@ if game.PlaceId == 13827198708 then
             _G.AutoBuyEggs = value
             while _G.AutoBuyEggs do
                 if _G.SelectedEgg then
-                    local args = {
-                        [1] = _G.SelectedEgg,
-                        [2] = "Buy1"
-                    }
-                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(unpack(args))
+                    game:GetService("ReplicatedStorage").GameClient.Events.RemoteFunction.BuyEgg:InvokeServer(_G.SelectedEgg, "Buy1")
                     wait(1)
                 else
                     print("No egg selected.")
@@ -174,17 +155,19 @@ if game.PlaceId == 13827198708 then
 
     CreditsTab:AddParagraph("More Updates", "For more updates, join my Discord!")
     CreditsTab:AddParagraph("Current Version 1.0", "8/31/24")
-     CreditsTab:AddButton({
-	Name = "Join my Discord (press this to copy my discord link!)",
-	Callback = function()
-      		setclipboard("https://discord.com/invite/Yb6JNPAm3u")
-      		OrionLib:MakeNotification({
-			Name = "Title!",
-			Content = "Thank you for joining my discord :)",
-			Image = "rbxassetid://4483345998",
-			Time = 5
-		})
-  	end
-})
+
+    CreditsTab:AddButton({
+        Name = "Join my Discord (press this to copy my discord link!)",
+        Callback = function()
+            setclipboard("https://discord.com/invite/Yb6JNPAm3u")
+            OrionLib:MakeNotification({
+                Name = "Thanks for joining lol",
+                Content = "Thank you for joining my discord :)",
+                Image = "rbxassetid://4483345998",
+                Time = 5
+            })
+        end
+    })
+
     OrionLib:Init()
 end

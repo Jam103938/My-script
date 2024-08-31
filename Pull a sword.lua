@@ -173,7 +173,18 @@ if game.PlaceId == 13827198708 then
     })
 
     CreditsTab:AddParagraph("More Updates", "For more updates, join my Discord!")
-    CreditsTab:AddParagraph("Current Version 1.0")
-
+    CreditsTab:AddParagraph("Current Version 1.0", "8/31/24")
+     Tab:AddButton({
+	Name = "Join my Discord (press this to copy my discord link!)",
+	Callback = function()
+      		setclipboard("https://discord.com/invite/Yb6JNPAm3u")
+      		OrionLib:MakeNotification({
+			Name = "Title!",
+			Content = "Thank you for joining my discord :)",
+			Image = "rbxassetid://4483345998",
+			Time = 5
+		})
+  	end
+})
     OrionLib:Init()
 end

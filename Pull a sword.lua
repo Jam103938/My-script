@@ -149,3 +149,4 @@ CreditsTab:AddParagraph("More Updates", "For more updates, join my Discord!")
 CreditsTab:AddParagraph("Current Version 1.0")
 
 OrionLib:Init()
+end

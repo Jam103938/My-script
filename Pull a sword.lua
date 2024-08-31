@@ -26,6 +26,8 @@ else
     end)
 end
 
+if game.PlaceId == 13827198708 then
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
     local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"

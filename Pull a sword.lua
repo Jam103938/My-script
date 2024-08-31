@@ -28,7 +28,7 @@ end
 
 if game.PlaceId == 13827198708 then
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
     local executor = identifyexecutor and identifyexecutor() or "Unknown Executor"
 
@@ -176,3 +176,4 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shl
     CreditsTab:AddParagraph("Current Version 1.0")
 
     OrionLib:Init()
+end

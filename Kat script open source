@@ -1,10 +1,5 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/tbao143/thaibao/main/Librarykavoui"))()
-
-
-
-local Window = Library.CreateLib("Tbao Hub | Kat", "DarkTheme")
-
-
+local Window = Library.CreateLib("Kat", "LightTheme")
 
 local Tab = Window:NewTab("Main")
 local Section = Tab:NewSection("Main")
@@ -16,7 +11,7 @@ ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
 local Toggle = Instance.new("TextButton")
-Toggle.Name = "Toggle"
+Toggle.Name = "On/Close"
 Toggle.Parent = ScreenGui
 Toggle.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Toggle.Position = UDim2.new(0, 0, 0.454706937, 0)
@@ -39,7 +34,7 @@ local aimAtPart = "HumanoidRootPart"
 local teamCheckEnabled = false
 local headSizeEnabled = false
 
--- Functions
+-- Functions --
 local function getClosestTarget()
     local Cam = workspace.CurrentCamera
     local Players = game:GetService("Players")

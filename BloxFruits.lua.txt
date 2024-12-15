@@ -638,6 +638,14 @@ function CheckQuest()
 			NameMon = "Isle Champion";
 			CFrameQuest = CFrame.new(-16539.078125, 55.68632888793945, 1051.5738525390625);
 			CFrameMon = CFrame.new(-16641.6796875, 235.7825469970703, 1031.282958984375);
+elseif MyLevel == 2556 or MyLevel <= 2574 then
+Mon = "Serpent Hunter";
+LevelQuest = 1;
+NameQuest = "TikiQuest1";
+NameMon = "Serpent Hunter";
+CFrameQuest = CFrame.new(-16665.1914, 104.596405, 1579.69434, 0.951068401, -0, -0.308980465, 0, 1, -0, 0.308980465, 0, 0.951068401);
+			CFrameMon = CFrame.new(-16621.4199, 121.907677, 1290.69006, -1.1920929e-07, 0, -1.00000012, -0.000122077778, 1, 0, 1.00000012, 0.000122077778, -1.1920929e-07);
+
 		end;
 	end;
 end;
@@ -2475,6 +2483,7 @@ elseif World3 then
 		"Island Boy",
 		"Sun-kissed Warrior",
 		"Isle Champion"
+"Serpent Hunter"
 	};
 end;
 MainTab:Seperator("Mob Farm");

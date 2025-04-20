@@ -1,0 +1,1186 @@
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local ClickButton = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local ImageLabel = Instance.new("ImageLabel")
+local TextButton = Instance.new("TextButton")
+local UICorner = Instance.new("UICorner")
+local UICorner_2 = Instance.new("UICorner")
+
+ClickButton.Name = "ClickButton"
+ClickButton.Parent = game.CoreGui
+ClickButton.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ClickButton
+MainFrame.AnchorPoint = Vector2.new(1, 0)
+MainFrame.BackgroundTransparency = 0.8
+MainFrame.BackgroundColor3 = Color3.fromRGB(38, 38, 38)
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(1, -60, 0, 10)
+MainFrame.Size = UDim2.new(0, 45, 0, 45)
+
+UICorner.CornerRadius = UDim.new(1, 0)
+UICorner.Parent = MainFrame
+
+ImageLabel.Parent = MainFrame
+ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+ImageLabel.BackgroundColor3 = Color3.new(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+ImageLabel.Size = UDim2.new(0, 45, 0, 45)
+ImageLabel.Image = "rbxassetid://135936359769289"
+
+UICorner_2.CornerRadius = UDim.new(0, 10)
+UICorner_2.Parent = ImageLabel
+
+TextButton.Parent = MainFrame
+TextButton.Size = UDim2.new(1, 0, 1, 0) 
+TextButton.BackgroundTransparency = 1
+TextButton.Text = ""
+TextButton.ZIndex = 2
+
+TextButton.MouseButton1Click:Connect(function()
+    VirtualInputManager:SendKeyEvent(true, "LeftControl", false, game)
+    VirtualInputManager:SendKeyEvent(false, "LeftControl", false, game)
+end)
+    
+local dragging = false
+local dragStart = nil
+local startPos = nil
+
+local function updatePosition(input)
+    local delta = input.Position - dragStart
+    local newPos = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+    MainFrame.Position = newPos
+end
+
+TextButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+    end
+end)
+
+TextButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updatePosition(input)
+    end
+end)
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+
+local Window = Fluent:CreateWindow({
+    Title = "Fluent " .. Fluent.Version,
+    SubTitle = "by dawid",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+-- Fluent provides Lucide Icons, they are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+    Misc = Window:AddTab({Title = "Misc", Icon = ""}),
+    Auto = Window:AddTab({Title = "Auto", Icon = ""}),
+    Teleport = Window:AddTab({Title = "Teleport", Icon = ""}),
+ Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Tabs.Main:AddButton({
+    Title = "Aimbot",
+    Description = "Keybind is L",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local Workspace = game:GetService("Workspace")
+        local RunService = game:GetService("RunService")
+        local UserInputService = game:GetService("UserInputService")
+        local Cam = Workspace.CurrentCamera
+        local LocalPlayer = Players.LocalPlayer
+
+        local aimbotEnabled = false
+        local fov = 100
+        local smoothness = 0.2
+
+        local FOVring = Drawing.new("Circle")
+        FOVring.Visible = false
+        FOVring.Thickness = 2
+        FOVring.Color = Color3.fromRGB(123, 2, 234)
+        FOVring.Filled = false
+        FOVring.Radius = fov
+        FOVring.Position = Cam.ViewportSize / 2
+
+        local function getClosestTarget()
+            if not LocalPlayer.Character then return end
+            local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if not rootPart then return end
+
+            local closestTarget, closestAngle = nil, math.rad(fov)
+            local cameraPos = Cam.CFrame.Position
+            local cameraLook = Cam.CFrame.LookVector
+
+            for _, npc in ipairs(Workspace:GetDescendants()) do
+                if npc:FindFirstChild("Humanoid") and npc:FindFirstChild("Head") and npc.Humanoid.Health > 0 then
+                    if not Players:GetPlayerFromCharacter(npc) then
+                        local npcPos = npc.Head.Position
+                        local direction = (npcPos - cameraPos).Unit
+                        local angle = math.acos(cameraLook:Dot(direction))
+                        if angle < closestAngle then
+                            closestTarget = npc
+                            closestAngle = angle
+                        end
+                    end
+                end
+            end
+
+            return closestTarget
+        end
+
+        local function updateAimbot()
+            if not aimbotEnabled then return end
+            
+            local target = getClosestTarget()
+            if not target then return end
+            
+            local targetPos = target.Head.Position
+            local currentCF = Cam.CFrame
+            local targetDirection = (targetPos - currentCF.Position).Unit
+            local newLookVector = currentCF.LookVector:Lerp(targetDirection, smoothness)
+            Cam.CFrame = CFrame.new(currentCF.Position, currentCF.Position + newLookVector)
+        end
+
+        local function updateDrawings()
+            FOVring.Position = Cam.ViewportSize / 2
+            FOVring.Radius = fov * (Cam.ViewportSize.Y / 1080)
+            FOVring.Visible = aimbotEnabled
+        end
+
+        UserInputService.InputBegan:Connect(function(input, gameProcessed)
+            if gameProcessed then return end
+            if input.KeyCode == Enum.KeyCode.L then
+                aimbotEnabled = not aimbotEnabled
+                FOVring.Visible = aimbotEnabled
+            end
+        end)
+
+        RunService.RenderStepped:Connect(function()
+            updateDrawings()
+            updateAimbot()
+        end)
+
+        game:GetService("Players").PlayerRemoving:Connect(function()
+            FOVring:Remove()
+        end)
+    end
+})
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+local noSpreadEnabled = false
+
+local function modifyGunSpread(tool)
+    if not tool then return end
+    local config = tool:FindFirstChildWhichIsA("Configuration")
+    if not config then return end
+    local spread = config:FindFirstChild("SpreadAngle")
+    if spread then
+        spread.Value = noSpreadEnabled and 0 or 5
+    end
+end
+
+local function onCharacterAdded(character)
+    character.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            modifyGunSpread(child)
+        end
+    end)
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") then
+            modifyGunSpread(tool)
+        end
+    end
+end
+
+local function onToolEquipped(tool)
+    modifyGunSpread(tool)
+end
+
+LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+if LocalPlayer.Character then
+    onCharacterAdded(LocalPlayer.Character)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid").Equipped:Connect(onToolEquipped)
+end)
+
+if LocalPlayer.Character then
+    for _, tool in ipairs(LocalPlayer.Character:GetChildren()) do
+        if tool:IsA("Tool") then
+            modifyGunSpread(tool)
+        end
+    end
+end
+
+local Toggle = Tabs.Main:AddToggle("NoSpreadToggle", 
+{
+    Title = "No spread for guns", 
+    Description = "Gun mod",
+    Default = false,
+    Callback = function(state)
+        noSpreadEnabled = state
+        if LocalPlayer.Character then
+            for _, tool in ipairs(LocalPlayer.Character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    modifyGunSpread(tool)
+                end
+            end
+        end
+    end 
+})
+
+
+
+local noSpreadEnabled = false
+
+local function modifyGunSpread(tool)
+    if not tool then return end
+    local config = tool:FindFirstChildWhichIsA("Configuration")
+    if not config then return end
+    local spread = config:FindFirstChild("SpreadAngle")
+    if spread then
+        spread.Value = noSpreadEnabled and 0 or 5
+    end
+end
+
+local function onCharacterAdded(character)
+    character.ChildAdded:Connect(function(child)
+        if child:IsA("Tool") then
+            modifyGunSpread(child)
+        end
+    end)
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") then
+            modifyGunSpread(tool)
+        end
+    end
+end
+
+local function onToolEquipped(tool)
+    modifyGunSpread(tool)
+end
+
+LocalPlayer.CharacterAdded:Connect(onCharacterAdded)
+if LocalPlayer.Character then
+    onCharacterAdded(LocalPlayer.Character)
+end
+
+LocalPlayer.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid").Equipped:Connect(onToolEquipped)
+end)
+
+if LocalPlayer.Character then
+    for _, tool in ipairs(LocalPlayer.Character:GetChildren()) do
+        if tool:IsA("Tool") then
+            modifyGunSpread(tool)
+        end
+    end
+end
+
+local Toggle = Tabs.Main:AddToggle("NoReloadToggle", 
+{
+    Title = "No reload cooldown", 
+    Description = "GunMod",
+    Default = false,
+    Callback = function(state)
+        noSpreadEnabled = state
+        if LocalPlayer.Character then
+            for _, tool in ipairs(LocalPlayer.Character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    modifyGunSpread(tool)
+                end
+            end
+        end
+    end 
+})
+
+Tabs.Misc:AddParagraph({
+    Title = "Misc",
+})
+
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+
+local ESPConfig = {
+    Colors = {
+        Items = {Color3.fromRGB(255, 105, 105), Color3.fromRGB(255, 180, 180)},
+        Animals = {Color3.fromRGB(170, 85, 255), Color3.fromRGB(220, 160, 255)},
+        NightEnemies = {Color3.fromRGB(85, 255, 85), Color3.fromRGB(180, 255, 180)},
+        Zombies = {Color3.fromRGB(85, 255, 85), Color3.fromRGB(180, 255, 180)}
+    },
+    Settings = {
+        OutlineTransparency = 0,
+        FillTransparency = 0.4,
+        TextSize = 12,
+        BillboardSize = UDim2.new(0, 120, 0, 20),
+        PulseSpeed = 1,
+        PulseRange = 0.3,
+        UpdateInterval = 0.5
+    }
+}
+
+local ESPHandles = {}
+local ESPEnabled = false
+
+local function CreateESP(object, colorPair)
+    if not object or not object.PrimaryPart then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP_ProHighlight"
+    highlight.Adornee = object
+    highlight.FillColor = colorPair[1]
+    highlight.OutlineColor = colorPair[2]
+    highlight.FillTransparency = ESPConfig.Settings.FillTransparency
+    highlight.OutlineTransparency = ESPConfig.Settings.OutlineTransparency
+    highlight.Parent = object
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "ESP_ProBillboard"
+    billboard.Adornee = object.PrimaryPart
+    billboard.Size = ESPConfig.Settings.BillboardSize
+    billboard.StudsOffset = Vector3.new(0, 3, 0)
+    billboard.AlwaysOnTop = true
+    billboard.LightInfluence = 0
+    billboard.Parent = object
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Text = object.Name
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.TextColor3 = colorPair[1]
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextSize = ESPConfig.Settings.TextSize
+    textLabel.Font = Enum.Font.GothamBlack
+    textLabel.TextStrokeTransparency = 0.2
+    textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    textLabel.Parent = billboard
+
+    local tweenInfo = TweenInfo.new(
+        ESPConfig.Settings.PulseSpeed,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.InOut,
+        -1,
+        true
+    )
+    local pulseTween = TweenService:Create(highlight, tweenInfo, {
+        FillTransparency = ESPConfig.Settings.FillTransparency - ESPConfig.Settings.PulseRange
+    })
+    pulseTween:Play()
+
+    ESPHandles[object] = {
+        Highlight = highlight,
+        Billboard = billboard,
+        TextLabel = textLabel,
+        PulseTween = pulseTween
+    }
+end
+
+local function ClearESP()
+    for obj, handles in pairs(ESPHandles) do
+        if handles.PulseTween then handles.PulseTween:Cancel() end
+        if handles.Highlight then handles.Highlight:Destroy() end
+        if handles.Billboard then handles.Billboard:Destroy() end
+    end
+    ESPHandles = {}
+end
+
+local function UpdateESP()
+    for obj, handles in pairs(ESPHandles) do
+        if not obj or not obj.Parent or not obj.PrimaryPart then
+            if handles.PulseTween then handles.PulseTween:Cancel() end
+            for _, instance in pairs(handles) do
+                if instance:IsA("Instance") then instance:Destroy() end
+            end
+            ESPHandles[obj] = nil
+        end
+    end
+
+    local function ProcessCategory(parent, colorPair)
+        if parent then
+            for _, obj in ipairs(parent:GetDescendants()) do
+                if obj:IsA("Model") and obj.PrimaryPart and not ESPHandles[obj] then
+                    CreateESP(obj, colorPair)
+                end
+            end
+        end
+    end
+
+    ProcessCategory(workspace:FindFirstChild("RuntimeItems"), ESPConfig.Colors.Items)
+    
+    local baseplates = workspace:FindFirstChild("Baseplates")
+    if baseplates and #baseplates:GetChildren() >= 2 then
+        local animals = baseplates:GetChildren()[2]:FindFirstChild("CenterBaseplate"):FindFirstChild("Animals")
+        ProcessCategory(animals, ESPConfig.Colors.Animals)
+    end
+
+    ProcessCategory(workspace:FindFirstChild("NightEnemies"), ESPConfig.Colors.NightEnemies)
+
+    local destroyedHouse = workspace:FindFirstChild("RandomBuildings") and workspace.RandomBuildings:FindFirstChild("DestroyedHouse")
+    local zombies = destroyedHouse and destroyedHouse:FindFirstChild("StandaloneZombiePart"):FindFirstChild("Zombies")
+    ProcessCategory(zombies, ESPConfig.Colors.Zombies)
+end
+
+local function AutoUpdateESP()
+    spawn(function()
+        while ESPEnabled do
+            UpdateESP()
+            task.wait(ESPConfig.Settings.UpdateInterval)
+        end
+    end)
+end
+
+local Toggle = Tabs.Misc:AddToggle("MyToggle", 
+{
+    Title = "ESP", 
+    Description = "Shows mostly everything",
+    Default = false,
+    Callback = function(state)
+        ESPEnabled = state
+        if ESPEnabled then
+            AutoUpdateESP()
+        else
+            ClearESP()
+        end
+    end 
+})
+
+
+Tabs.Misc:AddButton({
+    Title = "Fps Boost",
+    Description = "Removes textures",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+
+Lighting.GlobalShadows = false
+Lighting.FogEnd = 100000
+
+
+for _, part in pairs(workspace:GetDescendants()) do
+    if part:IsA("BasePart") then
+        part.Material = Enum.Material.SmoothPlastic
+        part.Reflectance = 0
+        part.CastShadow = false
+    end
+end
+
+
+for _, effect in pairs(Lighting:GetChildren()) do
+    if effect:IsA("PostEffect") then
+        effect.Enabled = false
+    end
+end
+    end
+})
+
+Tabs.Auto:AddParagraph({
+    Title = "Auto",
+    Content = "autopickupstuff"
+})
+
+local ProximityPromptService = game:GetService("ProximityPromptService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local promptConnection
+local eKeyTask
+local isRunning = false
+local isHoldingE = false
+local runtimeItems
+local isAutoPickupEnabled = false
+
+local function setupPromptListener()
+    if promptConnection then return end
+    promptConnection = ProximityPromptService.PromptButtonHoldBegan:Connect(function(prompt)
+        if prompt:IsA("ProximityPrompt") then
+            prompt.HoldDuration = 0
+        end
+    end)
+end
+
+local function cleanupPromptListener()
+    if promptConnection then
+        pcall(function()
+            promptConnection:Disconnect()
+            promptConnection = nil
+        end)
+    end
+end
+
+local function stopEKey()
+    if eKeyTask then
+        isHoldingE = false
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+        eKeyTask = nil
+    end
+end
+
+local function startDetectionLoop()
+    if isRunning then return end
+    isRunning = true
+
+    while isRunning and isAutoPickupEnabled do
+        if not runtimeItems then
+            local success = pcall(function()
+                runtimeItems = Workspace:WaitForChild("RuntimeItems", 5)
+            end)
+            if not success or not runtimeItems then
+                break
+            end
+        end
+
+        local found = nil
+        for _, item in ipairs(runtimeItems:GetChildren()) do
+            if item:FindFirstChildWhichIsA("ProximityPrompt", true) then
+                found = item
+                break
+            end
+        end
+
+        if found then
+            setupPromptListener()
+            if not eKeyTask then
+                isHoldingE = true
+                eKeyTask = task.spawn(function()
+                    while isHoldingE and isAutoPickupEnabled do
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+                        task.wait(0.1)
+                    end
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                end)
+            end
+            task.wait(0.1)
+        else
+            stopEKey()
+            cleanupPromptListener()
+            task.wait(0.5)
+        end
+    end
+
+    isRunning = false
+    stopEKey()
+    cleanupPromptListener()
+end
+
+local Toggle = Tabs.Auto:AddToggle("AutoPickupToggle", 
+{
+    Title = "AutoPickUpMoneyBag", 
+    Description = "money",
+    Default = false,
+    Callback = function(state)
+        isAutoPickupEnabled = state
+        if isAutoPickupEnabled then
+            task.spawn(startDetectionLoop)
+        else
+            isRunning = false
+            stopEKey()
+            cleanupPromptListener()
+        end
+    end 
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+
+local runtimeItems = Workspace:WaitForChild("RuntimeItems")
+local activateRemote = ReplicatedStorage
+    :WaitForChild("Packages")
+    :WaitForChild("RemotePromise")
+    :WaitForChild("Remotes")
+    :WaitForChild("C_ActivateObject")
+
+local targets = {
+    "ShotgunShells",
+    "RifleAmmo",
+    "RevolverAmmo",
+    "Bond"
+}
+
+local isAutoPickupEnabled = false
+local connection
+
+local function collectItem(item)
+    if not isAutoPickupEnabled then return end
+    if item and item:IsA("Model") then
+        for _, name in ipairs(targets) do
+            if item.Name == name then
+                activateRemote:FireServer(item)
+                break
+            end
+        end
+    end
+end
+
+local function startAutoPickup()
+    if connection then return end
+    for _, item in pairs(runtimeItems:GetChildren()) do
+        collectItem(item)
+    end
+    connection = runtimeItems.ChildAdded:Connect(collectItem)
+end
+
+local function stopAutoPickup()
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
+end
+
+local Toggle = Tabs.Auto:AddToggle("AutoPickupBondsAndAmmoToggle", 
+{
+    Title = "AutoPickUpBondsAndAmmo", 
+    Description = "Hope you're enjoying the script so far",
+    Default = false,
+    Callback = function(state)
+        isAutoPickupEnabled = state
+        if isAutoPickupEnabled then
+            startAutoPickup()
+        else
+            stopAutoPickup()
+        end
+    end 
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local runtimeItems = Workspace:WaitForChild("RuntimeItems")
+
+local pickUpToolRemote = ReplicatedStorage
+    :WaitForChild("Remotes")
+    :WaitForChild("Tool")
+    :WaitForChild("PickUpTool")
+
+local isAutoPickupEnabled = false
+local connection
+
+local function getNil(name, class)
+    for _, v in next, getnilinstances() do
+        if v.ClassName == class and v.Name == name then
+            return v
+        end
+    end
+    return nil
+end
+
+local function getWeapon(name)
+    if runtimeItems then
+        for _, v in pairs(runtimeItems:GetChildren()) do
+            if v:IsA("Model") and v.Name == name then
+                return v
+            end
+        end
+    end
+    return getNil(name, "Model")
+end
+
+local targets = {
+    "Rifle",
+    "Shotgun",
+    "Revolver",
+    "Sawed-Off Shotgun",
+    "Naval Revolver",
+    "Bolt Action Rifle",
+    "ShotgunShells",
+    "RifleAmmo",
+    "RevolverAmmo",
+    "Bond"
+}
+
+local function collectItem(item)
+    if not isAutoPickupEnabled then return end
+    if item and item:IsA("Model") then
+        for _, name in ipairs(targets) do
+            if item.Name == name then
+                pickUpToolRemote:FireServer(item)
+                break
+            end
+        end
+    end
+end
+
+local function startAutoPickup()
+    if connection then return end
+    for _, item in pairs(runtimeItems:GetChildren()) do
+        collectItem(item)
+    end
+    connection = runtimeItems.ChildAdded:Connect(collectItem)
+end
+
+local function stopAutoPickup()
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
+end
+
+local Toggle = Tabs.Auto:AddToggle("AutoPickupGunsAndItemsToggle", 
+{
+    Title = "AutoPickup Guns & Items", 
+    Description = "Automatically picks up guns, ammo, and bonds",
+    Default = false,
+    Callback = function(state)
+        isAutoPickupEnabled = state
+        if isAutoPickupEnabled then
+            startAutoPickup()
+        else
+            stopAutoPickup()
+        end
+    end 
+})
+Tabs.Teleport:AddParagraph({
+    Title = "Teleports",
+    Content = "ez"
+})
+
+Tabs.Teleport:AddButton({
+    Title = "Tp to castle",
+    Description = "Warning! you may or may not get jumped",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/leakerbro43/neox/refs/heads/main/tptocastle'))()
+    end
+})
+
+Tabs.Teleport:AddButton({
+    Title = "Tp to end",
+    Description = "Must have a gun to kill the outlaw, recomended to enable noclip and go thru walls to kill outlaws as soon as you kill the first one.",
+    Callback = function()
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+local targetPos = Vector3.new(-424.4, 28.1, -49040.7)
+
+local function enableNoclip()
+    humanoid.PlatformStand = true
+end
+
+local function disableNoclip()
+    humanoid.PlatformStand = false
+end
+
+local function sitInMaxim()
+    local seat = Workspace:FindFirstChild("Baseplates")
+        and Workspace.Baseplates:FindFirstChild("FinalBasePlate")
+        and Workspace.Baseplates.FinalBasePlate:FindFirstChild("OutlawBase")
+        and Workspace.Baseplates.FinalBasePlate.OutlawBase:FindFirstChild("Sentries")
+        and Workspace.Baseplates.FinalBasePlate.OutlawBase.Sentries:FindFirstChild("EnemyTurret")
+        and Workspace.Baseplates.FinalBasePlate.OutlawBase.Sentries.EnemyTurret:FindFirstChild("MaximGun")
+        and Workspace.Baseplates.FinalBasePlate.OutlawBase.Sentries.EnemyTurret.MaximGun:FindFirstChild("VehicleSeat")
+
+    if seat then
+        root.CFrame = seat.CFrame + Vector3.new(0, 3, 0)
+        seat:Sit(humanoid)
+        return humanoid.SeatPart == seat
+    end
+    return false
+end
+
+local function go()
+    enableNoclip()
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        if humanoid.SeatPart then
+            disableNoclip()
+            conn:Disconnect()
+            return
+        end
+
+        if not sitInMaxim() then
+            root.CFrame = CFrame.new(targetPos + Vector3.new(0, 3, 0))
+        end
+    end)
+end
+
+go()
+    end
+})
+
+Tabs.Teleport:AddButton({
+    Title = "CamLock onto final outlaws ONLY",
+    Description = "wont lock onto anything else keybind is P",
+    Callback = function()
+        local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local function safeFind(path)
+	local current = workspace
+	for _, part in ipairs(path) do
+		current = current:FindFirstChild(part)
+		if not current then return nil end
+	end
+	return current
+end
+
+local function getZombieFolders()
+	local folders = {}
+	for _, descendant in ipairs(workspace:GetDescendants()) do
+		if descendant:IsA("Folder") and descendant.Name:lower():find("zombie") then
+			table.insert(folders, descendant)
+		end
+	end
+	return folders
+end
+
+local function getSentries()
+	local result = {}
+	for _, model in ipairs(workspace:GetDescendants()) do
+		if model:IsA("Model") and model:FindFirstChild("TurretOutlaw") then
+			table.insert(result, model.TurretOutlaw)
+		end
+	end
+	return result
+end
+
+
+local function lockCameraToTarget(target)
+	if target and target:IsA("Model") and target:FindFirstChild("Head") then
+		camera.CameraType = Enum.CameraType.Custom
+		camera.CameraSubject = target.Head
+		return true
+	end
+	return false
+end
+
+local function resetCamera()
+	camera.CameraType = Enum.CameraType.Custom
+	camera.CameraSubject = player.Character and player.Character:FindFirstChild("Humanoid")
+end
+
+local function getValidTargets()
+	local allTargets = {}
+
+	for _, folder in ipairs(getZombieFolders()) do
+		if folder then
+			for _, enemy in ipairs(folder:GetChildren()) do
+				if enemy:IsA("Model") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+					table.insert(allTargets, enemy)
+				end
+			end
+		end
+	end
+
+	for _, sentry in ipairs(getSentries()) do
+		if sentry:IsA("Model") and sentry:FindFirstChild("Humanoid") and sentry.Humanoid.Health > 0 then
+			table.insert(allTargets, sentry)
+		end
+	end
+
+	return allTargets
+end
+
+local isToggled = false
+local currentLoop = nil
+
+local function startTargetCycle()
+	currentLoop = task.spawn(function()
+		while isToggled do
+			local targets = getValidTargets()
+
+			if #targets == 0 then
+				resetCamera()
+				break
+			end
+
+			for _, target in ipairs(targets) do
+				if not isToggled then break end
+
+				local humanoid = target:FindFirstChild("Humanoid")
+				if humanoid and humanoid.Health > 0 and lockCameraToTarget(target) then
+					repeat
+						task.wait(0.1)
+					until not isToggled or humanoid.Health <= 0
+				end
+			end
+
+			task.wait(0.2)
+		end
+	end)
+end
+
+--toggle is P
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if not gameProcessed and input.KeyCode == Enum.KeyCode.P then
+		isToggled = not isToggled
+
+		if isToggled then
+			startTargetCycle()
+		else
+			if currentLoop then
+				task.cancel(currentLoop)
+				currentLoop = nil
+			end
+			resetCamera()
+		end
+	end
+end)
+    end
+})
+
+
+Tabs.Teleport:AddButton({
+    Title = "Tp to train seat",
+    Description = "Make sure nobody is sitting on the seat",
+    Callback = function()
+        local Players = game:GetService("Players")
+local seat = workspace:WaitForChild("Train"):WaitForChild("TrainControls"):WaitForChild("ConductorSeat"):WaitForChild("VehicleSeat")
+local player = Players.LocalPlayer
+
+local function seatOnce()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+
+    character:SetPrimaryPartCFrame(seat.CFrame + Vector3.new(0, 2, 0))
+    
+
+    task.wait(0.1)
+
+    -- Sit the humanoid
+    humanoid.Sit = true
+end
+
+seatOnce()
+    end
+})
+
+Tabs.Teleport:AddButton({
+    Title = "Tp to fort",
+    Description = "May get jumped also",
+    Callback = function()
+        local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local root = character:WaitForChild("HumanoidRootPart")
+
+local seated = false
+local jittering = true
+local noclipEnabled = false
+local fortFound = false
+
+local targetPos = Vector3.new(-424.4, 28.1, -49040.7)
+
+local function enableNoclip()
+    humanoid.PlatformStand = true
+    noclipEnabled = true
+end
+
+local function disableNoclip()
+    humanoid.PlatformStand = false
+    noclipEnabled = false
+end
+
+local function sitInSeat(seat)
+    while character and humanoid and humanoid.SeatPart ~= seat do
+        character:MoveTo(seat.Position + Vector3.new(0, 3, 0))
+        task.wait(0.2)
+        seat:Sit(humanoid)
+        task.wait(0.5)
+    end
+    if humanoid.SeatPart == seat then
+        seated = true
+    end
+end
+
+local function tpToFortAndSeat()
+    local conn
+    conn = RunService.Heartbeat:Connect(function()
+        if not jittering or fortFound then
+            conn:Disconnect()
+            return
+        end
+
+        local current = root.Position
+        local direction = (targetPos - current).Unit
+        local step = direction * 45
+        root.CFrame = CFrame.new(current + step)
+
+        root.Anchored = true
+        task.delay(0.03, function()
+            if root then
+                root.Anchored = false
+            end
+        end)
+
+        local fort = Workspace:FindFirstChild("FortConstitution")
+        local cannonSeat = Workspace:FindFirstChild("RuntimeItems")
+            and Workspace.RuntimeItems:FindFirstChild("Cannon")
+            and Workspace.RuntimeItems.Cannon:FindFirstChild("VehicleSeat")
+
+        if fort and cannonSeat then
+            fortFound = true
+            jittering = false
+            conn:Disconnect()
+
+            root.CFrame = cannonSeat.CFrame + Vector3.new(0, 3, 0)
+            task.wait(0.3)
+            sitInSeat(cannonSeat)
+            disableNoclip()
+        end
+    end)
+end
+
+enableNoclip()
+tpToFortAndSeat()
+    end
+})
+
+Tabs.Teleport:AddButton({
+    Title = "Tp to TeslaLab",
+    Description = "Free $250",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+local TeslaLab = workspace:WaitForChild("TeslaLab")
+local runtime = workspace:WaitForChild("RuntimeItems")
+local seated = false
+local function sitInSeat(seat)
+    while player.Character and player.Character.Humanoid and player.Character.Humanoid.SeatPart ~= seat do
+        local aboveSeat = seat.Position + Vector3.new(0, 3, 0)
+        player.Character:MoveTo(aboveSeat)
+        task.wait(0.2)
+
+        seat:Sit(player.Character.Humanoid)
+        task.wait(0.5)
+    end
+
+    if player.Character and player.Character.Humanoid.SeatPart == seat then
+        seated = true
+    end
+end
+
+game:GetService("RunService").RenderStepped:Connect(function()
+    if player.Character and TeslaLab and not seated then
+        local pivotPos = TeslaLab:GetPivot().Position
+        player.Character:MoveTo(pivotPos)
+
+        local chair, seat
+        local success, found = pcall(function()
+            chair = runtime:FindFirstChild("Chair")
+            if chair then
+                seat = chair:FindFirstChild("Seat")
+                return seat and seat:IsA("Seat")
+            end
+            return false
+        end)
+
+        if success and found then
+            sitInSeat(seat)
+        end
+    end
+end)
+    end
+})
+
+Tabs.Misc:AddParagraph({
+    Title = "Other stuff i forgot to add",    
+})
+
+Tabs.Misc:AddButton({
+    Title = "Fullbright",
+    Description = "shine",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+Lighting.TimeOfDay = "14:00:00"
+Lighting.ClockTime = 14
+Lighting.Brightness = 0.9
+Lighting.GlobalShadows = false
+Lighting.OutdoorAmbient = Color3.new(0.8, 0.8, 0.8)
+Lighting.Ambient = Color3.new(0.8, 0.8, 0.8)
+Lighting.FogStart = 0
+Lighting.FogEnd = 1000000
+
+for _, effect in pairs(Lighting:GetChildren()) do
+    if effect:IsA("PostEffect") then
+        effect:Destroy()
+    end
+end
+
+local bloom = Instance.new("BloomEffect")
+bloom.Intensity = 0.3 
+bloom.Size = 16
+bloom.Threshold = 0.9
+bloom.Parent = Lighting
+-- forever full bright
+game:GetService("RunService").Stepped:Connect(function() -- i dont do the local runservice. Because i will just need it once.
+    Lighting.ClockTime = 14
+end)
+    end
+})
+
+Tabs.Misc:AddButton({
+    Title = "no cooldown proximity",
+    Description = "EX. no cooldown turning crank",
+    Callback = function()
+        local Workspace = game:GetService("Workspace")
+
+for _, v in ipairs(Workspace:GetDescendants()) do
+    if v:IsA("ProximityPrompt") then
+        v.HoldDuration = 0-- keep this 0 for auto prompt
+        v.Enabled = true
+        v.MaxActivationDistance = math.max(v.MaxActivationDistance, 7)--dont change this
+        v.RequiresLineOfSight = false--make this true if you want it not go through walls which is useless when on if theres max activation
+    end
+end
+    end
+})
+
+    Tabs.Misc:AddButton({
+    Title = "Become faster",
+    Description = "walkspeed to 22.458723418832",
+    Callback = function()
+        local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+if LocalPlayer and LocalPlayer.Character then
+    local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 22.458723418832
+    end
+end
+
+    end
+})
